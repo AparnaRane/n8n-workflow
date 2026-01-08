@@ -1,0 +1,560 @@
+{
+  "name": "Student Marks Automation – Dept-Stats",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1H9jUgE1wWWfAFMEU97qGeVyt_scwPmp-xIOXFvU642w",
+          "mode": "list",
+          "cachedResultName": "Marks (Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1H9jUgE1wWWfAFMEU97qGeVyt_scwPmp-xIOXFvU642w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2025253290,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1H9jUgE1wWWfAFMEU97qGeVyt_scwPmp-xIOXFvU642w/edit#gid=2025253290"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        16
+      ],
+      "id": "38766e28-240e-4b1a-a802-a981b89d9921",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "lsgfTdbQn6uyFdQ9",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const subjects = [\n  Number($json['Sub1 Marks']),\n  Number($json['Sub2 Marks']),\n  Number($json['Sub3 Marks']),\n  Number($json['Sub4 Marks']),\n  Number($json['Sub5 Marks']),\n  Number($json['Sub6 Marks'])\n];\n\nfor (let mark of subjects) {\n  if (isNaN(mark) || mark < 0 || mark > 100) {\n    throw new Error(\"❌ Invalid marks detected. Marks must be between 0 and 100.\");\n  }\n}\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        320
+      ],
+      "id": "fb936f9d-6932-4d4d-b093-ec99e18dd2bf",
+      "name": "Validate Marks"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const marks = [\n  Number($json[\"Sub1 Marks\"]),\n  Number($json[\"Sub2 Marks\"]),\n  Number($json[\"Sub3 Marks\"]),\n  Number($json[\"Sub4 Marks\"]),\n  Number($json[\"Sub5 Marks\"]),\n  Number($json[\"Sub6 Marks\"]),\n];\n\nconst total = marks.reduce((a, b) => a + b, 0);\nconst percentage = (total / 600) * 100;\n\n// Simple CGPA formula\nconst cgpa = (percentage / 10).toFixed(2);\n\nreturn {\n  ...$json,\n  Total: total,\n  Percentage: percentage.toFixed(2),\n  CGPA: cgpa,\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        320
+      ],
+      "id": "c541cef0-3984-41fa-8062-bf963ea94e5c",
+      "name": "CGPA Cal"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WFKrYSVt2H5QMVrcqF3SWoCtY74kYYCKkg1888KwT2c",
+          "mode": "list",
+          "cachedResultName": "StoringResults",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WFKrYSVt2H5QMVrcqF3SWoCtY74kYYCKkg1888KwT2c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WFKrYSVt2H5QMVrcqF3SWoCtY74kYYCKkg1888KwT2c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "RollNo": "={{ $json.RollNo }}",
+            "Name": "={{ $json.Name }}",
+            "Email Id": "={{ $json[\"Email Id\"] }}",
+            "Semester (1-4)": "={{ $json[\"Semester (1-4)\"] }}",
+            "Sub1 Marks": "={{ $json[\"Sub1 Marks\"] }}",
+            "Sub2 Marks": "={{ $json[\"Sub2 Marks\"] }}",
+            "Sub3 Marks": "={{ $json[\"Sub3 Marks\"] }}",
+            "Sub4 Marks": "={{ $json[\"Sub4 Marks\"] }}",
+            "Sub5 Marks": "={{ $json[\"Sub5 Marks\"] }}",
+            "Sub6 Marks": "={{ $json[\"Sub6 Marks\"] }}",
+            "total": "={{ $json.Total }}",
+            "percentage": "={{ $json.Percentage }}",
+            "cgpa": "={{ $json.CGPA }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "RollNo",
+              "displayName": "RollNo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Id",
+              "displayName": "Email Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Semester (1-4)",
+              "displayName": "Semester (1-4)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub1 Marks",
+              "displayName": "Sub1 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub2 Marks",
+              "displayName": "Sub2 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub3 Marks",
+              "displayName": "Sub3 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub4 Marks",
+              "displayName": "Sub4 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub5 Marks",
+              "displayName": "Sub5 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sub6 Marks",
+              "displayName": "Sub6 Marks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "percentage",
+              "displayName": "percentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cgpa",
+              "displayName": "cgpa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "c00998bf-d44d-4c90-a3af-da2ad7bfdb6b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bmaE7wr94bRKlsqs",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let rows = \"\";\n\nfor (const s of $input.first().json[\"Students:\"]) {\n  rows += `\n    <tr>\n      <td>${s.Name}</td>\n      <td>${s.RollNo}</td>\n      <td>${s[\"Semester (1-4)\"]}</td>\n      <td>${s.Percentage}</td>\n      <td>${s.CGPA}</td>\n    </tr>\n  `;\n}\n\nconst html = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial; }\n    table { border-collapse: collapse; width: 100%; }\n    th, td { border: 1px solid #444; padding: 8px; }\n    th { background: #f2f2f2; }\n  </style>\n</head>\n<body>\n\n<h2>Class Performance Report</h2>\n\n<table>\n  <tr>\n    <th>Name</th>\n    <th>Roll No</th>\n    <th>Semester</th>\n    <th>Percentage</th>\n    <th>CGPA</th>\n  </tr>\n  ${rows}\n</table>\n\n</body>\n</html>\n`;\nreturn {\n  reportHtml: html\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        512
+      ],
+      "id": "a72d3be0-4494-4183-89ee-05a65bde5a83",
+      "name": "BuildClassHtmlReport"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; }\n    h2 { color: #2c3e50; }\n    table { border-collapse: collapse; width: 100%; }\n    td, th { border: 1px solid #444; padding: 8px; }\n    th { background-color: #f2f2f2; }\n  </style>\n</head>\n<body>\n\n<h2>Academic Performance Report</h2>\n\n<p><b>Student Name:</b> ${$json.Name}</p>\n<p><b>Roll Number:</b> ${$json.RollNo}</p>\n<p><b>Semester:</b> ${$json['Semester (1-4)']}</p>\n\n<table>\n  <tr><th>Total Marks</th><td>${$json.total}</td></tr>\n  <tr><th>Percentage</th><td>${$json.percentage}%</td></tr>\n  <tr><th>CGPA</th><td>${$json.cgpa}</td></tr>\n</table>\n\n<p><br/>Regards,<br/>\n<b>Dept-Stats</b><br/>\nDepartment of Computer Engineering</p>\n\n</body>\n</html>\n`;\n\nreturn {\n  ...$json,\n  reportHtml: html\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        128
+      ],
+      "id": "ce40a784-294d-4a10-b8ef-632c0efea153",
+      "name": "StudentReportHtml"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yuqltqtxhtiauuaxdwog.supabase.co/rest/v1/student_marks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1cWx0cXR4aHRpYXV1YXhkd29nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODY3NjksImV4cCI6MjA4MzE2Mjc2OX0.gsw-lkKy0cxHmiEcbrHcjJ1flgrlZHPyt2m4myBZ3N4"
+            },
+            {
+              "name": "Authorization",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1cWx0cXR4aHRpYXV1YXhkd29nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODY3NjksImV4cCI6MjA4MzE2Mjc2OX0.gsw-lkKy0cxHmiEcbrHcjJ1flgrlZHPyt2m4myBZ3N4"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"student_name\": \"{{$json.Name}}\",\n  \"roll_no\": \"{{$json.RollNo}}\",\n  \"email\": \"{{$json[\"Email Id\"]}}\",\n  \"semester\": {{$json[\"Semester (1-4)\"]}},\n  \"subject1\": {{$json[\"Sub1 Marks\"]}},\n  \"subject2\": {{$json[\"Sub2 Marks\"]}},\n  \"subject3\": {{$json[\"Sub3 Marks\"]}},\n  \"subject4\": {{$json[\"Sub4 Marks\"]}},\n  \"subject5\": {{$json[\"Sub5 Marks\"]}},\n  \"subject6\": {{$json[\"Sub6 Marks\"]}},\n  \"total\": {{$json.Total}},\n  \"percentage\": {{$json.Percentage}},\n  \"cgpa\": {{$json.CGPA}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -96,
+        320
+      ],
+      "id": "9c84b0ef-bac8-4940-af0a-5d4f5645bc55",
+      "name": "StoringInSupabase"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        576,
+        416
+      ],
+      "id": "a3c5fff5-df13-49b6-aa1f-bbd3bb0319fc",
+      "name": "DownloadPDF"
+    },
+    {
+      "parameters": {
+        "sendTo": "aparna30@ymail.com",
+        "subject": "Aggregate Students Info",
+        "message": "=Following is the List of Students:\n{{ $json.reportHtml }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        608
+      ],
+      "id": "6b4fd9a2-fc13-43e0-ad9e-f469511bad54",
+      "name": "Mail_to_HOD-HTML",
+      "webhookId": "3f584c68-de50-49e5-bf4c-76453ca68464",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email Id'] }}",
+        "subject": "=performance of  {{ $json.RollNo }}",
+        "message": "={{ $json.reportHtml }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        128
+      ],
+      "id": "43bf300a-3335-42eb-96d6-29e22111b5f9",
+      "name": "EmailStudents",
+      "webhookId": "8878f015-45d6-420e-af55-a3255842539e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "Students:",
+        "options": {
+          "includeBinaries": false
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        512
+      ],
+      "id": "7a9ee90a-fd45-44d1-a7b6-aa37c20f814b",
+      "name": "AggregateStudentsRecords",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlToPDF",
+        "html": "={{ $json.reportHtml }}",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        352,
+        416
+      ],
+      "id": "3e64a48e-ae86-4502-996f-a41a2c829ee6",
+      "name": "ConvertHTMLToPDF",
+      "credentials": {
+        "pdfcoApi": {
+          "id": "aknAXGCMpfaAGu2G",
+          "name": "PDF.co account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Marks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Marks": {
+      "main": [
+        []
+      ]
+    },
+    "CGPA Cal": {
+      "main": [
+        [
+          {
+            "node": "StoringInSupabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AggregateStudentsRecords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "StudentReportHtml",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StudentReportHtml": {
+      "main": [
+        [
+          {
+            "node": "EmailStudents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuildClassHtmlReport": {
+      "main": [
+        [
+          {
+            "node": "Mail_to_HOD-HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ConvertHTMLToPDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StoringInSupabase": {
+      "main": [
+        []
+      ]
+    },
+    "EmailStudents": {
+      "main": [
+        []
+      ]
+    },
+    "AggregateStudentsRecords": {
+      "main": [
+        [
+          {
+            "node": "BuildClassHtmlReport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConvertHTMLToPDF": {
+      "main": [
+        [
+          {
+            "node": "DownloadPDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "NZeRuovofDm00hsb"
+  },
+  "versionId": "252cd484-034b-41d4-8bd8-a26d16340fb9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d048f30c9fcad10e5d38f3f9413b8b4d3e5ad3549fdbf662bf38819f144a782d"
+  },
+  "id": "zqO1NNsZRoV1DPAq",
+  "tags": []
+}
