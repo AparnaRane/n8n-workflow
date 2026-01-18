@@ -1,0 +1,67 @@
+{
+  "name": "error workflow copy",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "7b8f3067-787a-49a9-9159-bd32a04c7738",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "aparna@gec.ac.in",
+        "subject": "error in workflow ",
+        "message": "PLEASE CHECK YOUR SUBMISSIONS",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        -128
+      ],
+      "id": "9c90f8be-8627-4a89-870e-50d601344df7",
+      "name": "Send a message",
+      "webhookId": "4435f14c-6dc6-4334-8af9-af25767d6cdf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "none"
+  },
+  "versionId": "8e1b032c-bde5-449d-b0d2-ff24c9c1155f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d048f30c9fcad10e5d38f3f9413b8b4d3e5ad3549fdbf662bf38819f144a782d"
+  },
+  "id": "NZeRuovofDm00hsb",
+  "tags": []
+}

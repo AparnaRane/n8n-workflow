@@ -1,0 +1,363 @@
+{
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "238b2bef-dbbf-46b8-b006-4b7a74f1e6e5",
+      "name": "Start Workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "numberOfStudents",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "id-2",
+              "name": "numberOfSubjects",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "numberOfSemesters",
+              "value": 4,
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "subjects",
+              "value": "[\"Mathematics\", \"Physics\", \"Chemistry\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6db051ef-8d54-4dd6-bab1-5f2f540613f5",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate student marks data for 5 students across 4 semesters\nconst students = [\n  { id: 'S001', name: 'Alice Johnson', email: 'alice.johnson@university.edu' },\n  { id: 'S002', name: 'Bob Smith', email: 'bob.smith@university.edu' },\n  { id: 'S003', name: 'Charlie Brown', email: 'charlie.brown@university.edu' },\n  { id: 'S004', name: 'Diana Prince', email: 'diana.prince@university.edu' },\n  { id: 'S005', name: 'Ethan Hunt', email: 'ethan.hunt@university.edu' }\n];\n\nconst subjects = ['Mathematics', 'Physics', 'Chemistry'];\nconst semesters = [1, 2, 3, 4];\n\n// Generate marks with variation to identify at-risk students\nconst generateMarks = (studentIndex, semester, subject) => {\n  // Student 1 (Alice) - Consistent good performance\n  if (studentIndex === 0) return Math.floor(Math.random() * 15) + 75; // 75-90\n  \n  // Student 2 (Bob) - Declining performance (at-risk)\n  if (studentIndex === 1) {\n    const baseScore = 80 - (semester * 10); // Declining trend\n    return Math.max(40, baseScore + Math.floor(Math.random() * 10));\n  }\n  \n  // Student 3 (Charlie) - Struggling student (at-risk)\n  if (studentIndex === 2) return Math.floor(Math.random() * 15) + 45; // 45-60\n  \n  // Student 4 (Diana) - Average performance\n  if (studentIndex === 3) return Math.floor(Math.random() * 15) + 65; // 65-80\n  \n  // Student 5 (Ethan) - Improving performance\n  if (studentIndex === 4) {\n    const baseScore = 60 + (semester * 5); // Improving trend\n    return Math.min(95, baseScore + Math.floor(Math.random() * 10));\n  }\n};\n\n// Create student records with all semester marks\nconst studentRecords = students.map((student, index) => {\n  const record = {\n    studentId: student.id,\n    studentName: student.name,\n    email: student.email,\n    semesters: {}\n  };\n  \n  // Add marks for each semester\n  semesters.forEach(semester => {\n    record.semesters[`semester${semester}`] = {\n      Mathematics: generateMarks(index, semester, 'Mathematics'),\n      Physics: generateMarks(index, semester, 'Physics'),\n      Chemistry: generateMarks(index, semester, 'Chemistry')\n    };\n  });\n  \n  // Calculate overall average\n  let totalMarks = 0;\n  let subjectCount = 0;\n  \n  semesters.forEach(semester => {\n    subjects.forEach(subject => {\n      totalMarks += record.semesters[`semester${semester}`][subject];\n      subjectCount++;\n    });\n  });\n  \n  record.overallAverage = Math.round(totalMarks / subjectCount * 100) / 100;\n  \n  return record;\n});\n\nreturn studentRecords.map(record => ({ json: record }));"
+      },
+      "id": "562b0600-3d29-4f24-8f0f-1c3da312fbcf",
+      "name": "Generate Student Marks Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "average",
+              "field": "marks"
+            },
+            {
+              "aggregation": "min",
+              "field": "marks"
+            },
+            {
+              "aggregation": "max",
+              "field": "marks"
+            },
+            {}
+          ]
+        },
+        "options": {
+          "outputFormat": "singleItem"
+        }
+      },
+      "id": "45698e3e-f0d4-4ef0-bc9f-8721abddfbe7",
+      "name": "Calculate Statistics",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the current item (student data)\nconst student = $input.item.json;\n\n// Calculate average marks for each semester\nconst sem1Avg = (student.sem1_subject1 + student.sem1_subject2 + student.sem1_subject3 + student.sem1_subject4 + student.sem1_subject5) / 5;\nconst sem2Avg = (student.sem2_subject1 + student.sem2_subject2 + student.sem2_subject3 + student.sem2_subject4 + student.sem2_subject5) / 5;\nconst sem3Avg = (student.sem3_subject1 + student.sem3_subject2 + student.sem3_subject3 + student.sem3_subject4 + student.sem3_subject5) / 5;\nconst sem4Avg = (student.sem4_subject1 + student.sem4_subject2 + student.sem4_subject3 + student.sem4_subject4 + student.sem4_subject5) / 5;\n\n// Calculate decline from semester 1 to semester 4\nconst averageDecline = sem1Avg - sem4Avg;\n\n// Check for consistent decline across semesters\nconst hasConsistentDecline = (sem1Avg > sem2Avg) && (sem2Avg > sem3Avg) && (sem3Avg > sem4Avg);\n\n// Determine if student is at risk\nlet isAtRisk = false;\nlet performanceTrend = \"Stable\";\nlet reason = \"Performance is stable or improving\";\n\nif (averageDecline > 10) {\n  isAtRisk = true;\n  performanceTrend = \"Declining\";\n  reason = `Average marks declined by ${averageDecline.toFixed(2)} points from Semester 1 to Semester 4`;\n} else if (hasConsistentDecline) {\n  isAtRisk = true;\n  performanceTrend = \"Consistently Declining\";\n  reason = \"Consistent decline in average marks across all semesters\";\n} else if (sem4Avg > sem1Avg) {\n  performanceTrend = \"Improving\";\n  reason = \"Performance is improving over time\";\n}\n\n// Return the student data with additional fields\nreturn {\n  ...student,\n  sem1Average: parseFloat(sem1Avg.toFixed(2)),\n  sem2Average: parseFloat(sem2Avg.toFixed(2)),\n  sem3Average: parseFloat(sem3Avg.toFixed(2)),\n  sem4Average: parseFloat(sem4Avg.toFixed(2)),\n  isAtRisk: isAtRisk,\n  performanceTrend: performanceTrend,\n  averageDecline: parseFloat(averageDecline.toFixed(2)),\n  reason: reason\n};"
+      },
+      "id": "dbbd4c56-e2b9-4572-b714-333075ed80c7",
+      "name": "Identify At-Risk Students",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.isAtRisk }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1dccdc59-98aa-402d-8cee-a778766eb947",
+      "name": "Filter At-Risk Students",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "emailSubject",
+              "value": "Academic Performance Alert - Action Required",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "emailBody",
+              "value": "=Dear {{ $json.name }},\n\nWe have noticed a concerning trend in your academic performance across the semesters.\n\nPerformance Summary:\n- Trend: {{ $json.performanceTrend }}\n- Average Decline: {{ $json.averageDecline }} points\n- Reason: {{ $json.reason }}\n\nWe encourage you to:\n1. Meet with your academic advisor\n2. Attend tutoring sessions\n3. Review your study habits and time management\n\nPlease contact the academic support office to schedule a meeting.\n\nBest regards,\nAcademic Affairs Office",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "studentEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "studentName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d84f3042-80d1-4052-bccd-792fcfdde8c9",
+      "name": "Format Email Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "statisticsTitle",
+              "value": "Student Performance Statistics - All Semesters",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "totalStudents",
+              "value": "={{ $json.student_count }}",
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "averageMarks",
+              "value": "={{ $json.average_average }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "minimumMarks",
+              "value": "={{ $json.min_minimum }}",
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "maximumMarks",
+              "value": "={{ $json.max_maximum }}",
+              "type": "number"
+            },
+            {
+              "id": "id-6",
+              "name": "reportGenerated",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b80d0184-551a-4572-8d22-c90a64f4e302",
+      "name": "Display Statistics Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "=aparnarane93@gmail.com",
+        "subject": "less marks",
+        "emailType": "text",
+        "message": "this marks are low",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        192
+      ],
+      "id": "530a6130-9a7e-45c6-bf03-fcf632c39147",
+      "name": "Send a message",
+      "webhookId": "6fb31682-d303-4c64-bba3-2e16bba0e0f6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start Workflow": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Generate Student Marks Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Student Marks Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Statistics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Identify At-Risk Students",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify At-Risk Students": {
+      "main": [
+        [
+          {
+            "node": "Filter At-Risk Students",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter At-Risk Students": {
+      "main": [
+        [
+          {
+            "node": "Format Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email Content": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Statistics": {
+      "main": [
+        [
+          {
+            "node": "Display Statistics Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a31409b6-4ba3-4d42-bf13-44eb4bd25816",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d048f30c9fcad10e5d38f3f9413b8b4d3e5ad3549fdbf662bf38819f144a782d"
+  },
+  "id": "745FwazTsfaRvSFo",
+  "tags": []
+}
