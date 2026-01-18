@@ -1,0 +1,489 @@
+{
+  "name": "csv upload",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1CpsVYXGfuqqVkWSkHslbgCv-qgvUbK29KwF1JVlqOcg",
+          "mode": "list",
+          "cachedResultName": "SayMarks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CpsVYXGfuqqVkWSkHslbgCv-qgvUbK29KwF1JVlqOcg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 444811866,
+          "mode": "list",
+          "cachedResultName": "marks_attendance_upload_with_one_record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CpsVYXGfuqqVkWSkHslbgCv-qgvUbK29KwF1JVlqOcg/edit#gid=444811866"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        240
+      ],
+      "id": "abdab94e-28fa-4fb7-a9a6-4b3bf9ec5ea8",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "lsgfTdbQn6uyFdQ9",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5b051b3-785d-463c-b76d-744b3e5caa91",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        48
+      ],
+      "id": "6f4677e3-b2a0-4219-9aef-69879ba3a5bf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "62ec1734-4793-4019-b581-dde3cf4a41f6",
+              "leftValue": "={{ $json.total_attendance }}",
+              "rightValue": 75,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        240
+      ],
+      "id": "c6eb0dd9-20cb-4bc4-a13c-5036d7a6d48b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "aparnarane93@gmail.com",
+        "subject": "Attendance Warning – Immediate Attention Required",
+        "message": "=Dear {{ $json.roll_no }},  Your attendance is currently {{ $json.total_attendance }}%, which is below the required minimum of 75%.  Please note: - You may be marked NOT ELIGIBLE for internal assessment - Immediate improvement is required  Contact your class teacher for clarification.  – Department of Engineering",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        240
+      ],
+      "id": "7017fe8b-1970-4fdb-a79b-5b45e09fef76",
+      "name": "Less Attendance Email",
+      "webhookId": "ce9b83f2-d068-4fbd-9cfc-bfe0b69e8877",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "aparna30@ymail.com",
+        "subject": "Academic Performance Summary",
+        "message": "=Dear {{ $json.roll_no }},  Your academic performance summary is as follows:   Attendance: {{ $json.total_attendance }}% Semester Percentage: {{ $json.semester_percentage }} Eligibilty for term: {{ $json.eligible }}  Keep up the good work.  – Department of Engineering",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        448
+      ],
+      "id": "2b9c38bb-05f4-422d-b381-14b277bc2de7",
+      "name": "Academic Performance Summary",
+      "webhookId": "ffce1ade-32b7-448b-8a9d-31e4e192798f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g1cmKJKRjIxcGAQP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "results",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "roll_no",
+              "fieldValue": "={{ $json.roll_no }}"
+            },
+            {
+              "fieldId": "semester_percentage",
+              "fieldValue": "={{ $json.semester_percentage }}"
+            },
+            {
+              "fieldId": "eligible",
+              "fieldValue": "={{ $json.eligible }}"
+            },
+            {
+              "fieldId": "cgpa",
+              "fieldValue": "={{ $json.cgpa }}"
+            },
+            {
+              "fieldId": "grade",
+              "fieldValue": "={{ $json.grade }}"
+            },
+            {
+              "fieldId": "subject1_marks",
+              "fieldValue": "={{ $json.subject1_marks }}"
+            },
+            {
+              "fieldId": "subject2_marks",
+              "fieldValue": "={{ $json.subject2_marks }}"
+            },
+            {
+              "fieldId": "subject3_marks",
+              "fieldValue": "={{ $json.subject3_marks }}"
+            },
+            {
+              "fieldId": "subject4_marks",
+              "fieldValue": "={{ $json.subject4_marks }}"
+            },
+            {
+              "fieldId": "subject5_marks",
+              "fieldValue": "={{ $json.subject5_marks }}"
+            },
+            {
+              "fieldId": "subject6_marks",
+              "fieldValue": "={{ $json.subject6_marks }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        528,
+        48
+      ],
+      "id": "559f1d38-b725-4a9d-9877-290be3801f21",
+      "name": "storing in results table",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uZYgmqMjenrs5a4P",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "attendance",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "=roll_no",
+              "fieldValue": "={{ $json.roll_no }}"
+            },
+            {
+              "fieldId": "attendance",
+              "fieldValue": "={{ $json.total_attendance }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        528,
+        432
+      ],
+      "id": "86f55ba4-29bb-4e63-81c9-8e4b8931d472",
+      "name": "storing in attendance table",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uZYgmqMjenrs5a4P",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ui-enter-marks",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "1a19d1ed-d0e6-45d1-9736-04a459a8f04f",
+      "name": "ui-enter-marks",
+      "webhookId": "28c97fdc-f278-46c0-b32b-04eff4f34e95"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nfor (const item of items) {\n\n  const marksFields = [\n    \"subject1_marks\",\n    \"subject2_marks\",\n    \"subject3_marks\",\n    \"subject4_marks\",\n    \"subject5_marks\",\n    \"subject6_marks\"\n  ];\n\n  const attendanceFields = [\n    \"subject1_attendance\",\n    \"subject2_attendance\",\n    \"subject3_attendance\",\n    \"subject4_attendance\",\n    \"subject5_attendance\",\n    \"subject6_attendance\"\n  ];\n\n  // ----------------------------\n  // Validate marks\n  // ----------------------------\n  for (const field of marksFields) {\n    const rawValue = item.json[field];\n\n    if (rawValue === undefined || rawValue === null || rawValue === \"\") {\n      throw new Error(`❌ ${field} is missing`);\n    }\n\n    const value = Number(rawValue);\n\n    if (isNaN(value) || value < 0 || value > 100) {\n      throw new Error(`❌ Invalid marks in ${field}`);\n    }\n\n    // normalize value back into JSON\n    item.json[field] = value;\n  }\n\n  // ----------------------------\n  // Validate attendance\n  // ----------------------------\n  for (const field of attendanceFields) {\n    const rawValue = item.json[field];\n\n    if (rawValue === undefined || rawValue === null || rawValue === \"\") {\n      throw new Error(`❌ ${field} is missing`);\n    }\n\n    const value = Number(rawValue);\n\n    if (isNaN(value) || value < 0 || value > 100) {\n      throw new Error(`❌ Invalid attendance in ${field}`);\n    }\n\n    // normalize value back into JSON\n    item.json[field] = value;\n  }\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        240
+      ],
+      "id": "b68e0130-2278-4fa9-b17d-a8f15a69ef27",
+      "name": "Validate Marks & Attendance"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsedBody = JSON.parse($json.body);\n\nreturn [\n  {\n    json: parsedBody\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        16
+      ],
+      "id": "570c113c-95ba-447a-85a0-c2fec8eaba36",
+      "name": "parse"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yuqltqtxhtiauuaxdwog.supabase.co/functions/v1/calculate-results1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1cWx0cXR4aHRpYXV1YXhkd29nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODY3NjksImV4cCI6MjA4MzE2Mjc2OX0.gsw-lkKy0cxHmiEcbrHcjJ1flgrlZHPyt2m4myBZ3N4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "roll_no",
+              "value": "={{ $json.roll_no }}"
+            },
+            {
+              "name": "=subject1_marks",
+              "value": "={{ $json.subject1_marks }}"
+            },
+            {
+              "name": "subject2_marks",
+              "value": "={{ $json.subject2_marks }}"
+            },
+            {
+              "name": "subject3_marks",
+              "value": "={{ $json.subject3_marks }}"
+            },
+            {
+              "name": "subject4_marks",
+              "value": "={{ $json.subject4_marks }}"
+            },
+            {
+              "name": "subject5_marks",
+              "value": "={{ $json.subject5_marks }}"
+            },
+            {
+              "name": "subject6_marks",
+              "value": "={{ $json.subject6_marks }}"
+            },
+            {
+              "name": "subject1_attendance",
+              "value": "={{ $json.subject1_attendance }}"
+            },
+            {
+              "name": "subject2_attendance",
+              "value": "={{ $json.subject2_attendance }}"
+            },
+            {
+              "name": "subject3_attendance",
+              "value": "={{ $json.subject3_attendance }}"
+            },
+            {
+              "name": "subject4_attendance",
+              "value": "={{ $json.subject4_attendance }}"
+            },
+            {
+              "name": "subject5_attendance",
+              "value": "={{ $json.subject5_attendance }}"
+            },
+            {
+              "name": "subject6_attendance",
+              "value": "={{ $json.subject6_attendance }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        240
+      ],
+      "id": "f122ecd3-911e-41c6-9766-531144f9e584",
+      "name": "EdgeFunctionCGPA",
+      "executeOnce": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Marks & Attendance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Less Attendance Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Academic Performance Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "storing in results table": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ui-enter-marks": {
+      "main": [
+        [
+          {
+            "node": "parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Marks & Attendance": {
+      "main": [
+        [
+          {
+            "node": "EdgeFunctionCGPA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse": {
+      "main": [
+        [
+          {
+            "node": "EdgeFunctionCGPA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EdgeFunctionCGPA": {
+      "main": [
+        [
+          {
+            "node": "storing in results table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "storing in attendance table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "NZeRuovofDm00hsb"
+  },
+  "versionId": "ffd537a1-664c-4d48-9d44-4c162373ebdc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d048f30c9fcad10e5d38f3f9413b8b4d3e5ad3549fdbf662bf38819f144a782d"
+  },
+  "id": "QDMvMyPuLGG3wUi7",
+  "tags": []
+}
